@@ -1,70 +1,38 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-
-/**
- * Base
- */
-// Canvas
+import GUI from "lil-gui";
 const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 0.2);
+directionalLight.position.set(0, 1, 0);
+scene.add(directionalLight, directionalLightHelper);
+const material = new THREE.MeshStandardMaterial();
+material.roughness = 0.4;
 
-/**
- * Sizes
- */
+// Objects
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), material);
+sphere.position.x = -1.5;
+
+const cube = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.75, 0.75), material);
+
+const torus = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.2, 32, 64), material);
+torus.position.x = 1.5;
+scene.add(sphere, cube, torus);
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-
-window.addEventListener("resize", () => {
-  // Update sizes
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
-
-  // Update camera
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-
-  // Update renderer
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
-
-// geometries
-const sphere = new THREE.SphereGeometry(0.5, 64, 64);
-const plane = new THREE.PlaneGeometry(1, 1, 100, 100);
-const torus = new THREE.TorusGeometry(0.5, 0.5, 0.5);
-const material = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
-  wireframe: true,
-});
-//mesh=geometry+material
-
-const mesh = new THREE.Mesh(sphere, material);
-const mesh2 = new THREE.Mesh(plane, material);
-const mesh3 = new THREE.Mesh(torus, material);
-scene.add(mesh, mesh2, mesh3);
-/**
- * Camera
- */
-// Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.x = 1;
 camera.position.y = 1;
 camera.position.z = 2;
 scene.add(camera);
-
-// Controls
-//this allows u to access controls and provide the camera and canvas to it
 const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; // gives a sense of weight to the controls
-
-/**
- * Renderer
- * so that we can render the scene on the canvas
- */
+controls.enableDamping = true;
+const clock = new THREE.Clock();
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
 });
@@ -76,13 +44,17 @@ A higher pixel ratio improves sharpness, but using values above 2 can significan
  */
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-/**
- * Animate
- */
-const clock = new THREE.Clock();
-
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  // Update objects
+  sphere.rotation.y = 0.1 * elapsedTime;
+  cube.rotation.y = 0.1 * elapsedTime;
+  torus.rotation.y = 0.1 * elapsedTime;
+
+  sphere.rotation.x = 0.15 * elapsedTime;
+  cube.rotation.x = 0.15 * elapsedTime;
+  torus.rotation.x = 0.15 * elapsedTime;
 
   // Update controls
   controls.update();
